@@ -21,8 +21,6 @@ const geistMono = localFont({
 export default function Home() {
   const ref = useRef<HTMLHeadingElement>(null);
   const { scrollY } = useContext(ScrollContext);
-  const [isModalOpen, setModalOpen] = useState(false);
-
   let progress = 0;
   const { current: elContainer } = ref;
 
