@@ -29,7 +29,7 @@ const Blog = () => {
     );
   });
 
-  const categories = ["All", "Next.js", "Framer Motion", "CSS", "React", "Deployment"];
+  const categories = ["All", "Laravel", "React", "Express", "Next.js"];
 
   return (
     <div className="p-8">
@@ -45,21 +45,24 @@ const Blog = () => {
       />
 
       {/* Tombol badge kategori */}
-      <div className="mb-6 flex flex-wrap space-x-4">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            className={`rounded-full text-lg font-medium px-4 py-2 transition-colors duration-300 ease-in-out ${
-              (selectedCategory === category || (selectedCategory === "" && category === "All"))
-                ? "bg-black text-white"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-            onClick={() => setSelectedCategory(category === "All" ? "" : category)}
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
+      <div className="mb-6 overflow-x-auto">
+  <div className="flex space-x-4">
+    {categories.map((category) => (
+      <Button
+        key={category}
+        className={`flex-shrink-0 text-lg font-medium px-4 py-2 transition-colors duration-300 ease-in-out ${
+          (selectedCategory === category || (selectedCategory === "" && category === "All"))
+            ? "bg-black text-white"
+            : "bg-gray-200 hover:bg-gray-300"
+        } rounded-full`}
+        onClick={() => setSelectedCategory(category === "All" ? "" : category)}
+      >
+        {category}
+      </Button>
+    ))}
+  </div>
+</div>
+
 
       {/* Daftar post dengan animasi */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

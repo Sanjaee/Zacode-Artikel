@@ -1,20 +1,50 @@
+import { useEffect, useState } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { posts } from "../../data/posts"; // Import posts dari file data
-import { useRouter } from "next/router"; // Import useRouter untuk navigasi
-import { useState } from "react";
+import { posts } from "../../data/posts";
+import { useRouter } from "next/router";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { FiCopy } from "react-icons/fi";
+import Prism from "prismjs";
+import "prismjs/themes/prism-okaidia.css"; // Kamu bisa pilih tema lain sesuai keinginan
 
 // Halaman detail post berdasarkan ID
-const PostDetail = ({ post }: { post: { id: number; title: string; description: string; image: string; contentSections: any[] } }) => {
+const PostDetail = ({
+  post,
+}: {
+  post: {
+    id: number;
+    title: string;
+    description: string;
+    image: string;
+    contentSections: any[];
+  };
+}) => {
   const [copied, setCopied] = useState(false);
-  const router = useRouter(); // Gunakan useRouter untuk mendapatkan fungsi router
+  const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
+
+  // Pastikan Prism hanya dijalankan di client-side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsClient(true); // Menandai bahwa kita sudah di client-side
+      Prism.highlightAll();
+    }
+  }, [post]);
+
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000); // Reset copied setelah 2 detik
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
+
+  if (!isClient) return null; // Menunda rendering sampai berada di client-side
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
       {/* Tombol Kembali */}
       <button
-        onClick={() => router.back()} // Kembali ke halaman sebelumnya
+        onClick={() => router.back()}
         className="mb-4 bg-black text-white px-4 py-2 rounded hover:bg-gray-600"
       >
         Kembali
@@ -22,29 +52,51 @@ const PostDetail = ({ post }: { post: { id: number; title: string; description: 
 
       <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
       <p className="text-lg text-gray-600 mb-6">{post.description}</p>
-      {post.image && <img src={post.image} alt={post.title} className="w-full h-auto mb-8 rounded-lg shadow-md" />}
+      {post.image && (
+        <img
+          src={post.image}
+          alt={post.title}
+          className="w-full h-auto mb-8 rounded-lg shadow-md"
+        />
+      )}
 
       {/* Render setiap section konten secara dinamis */}
       {post.contentSections.map((section, index) => {
         if (section.type === "text") {
-          return <p key={index} className="text-gray-700 mb-4">{section.content}</p>;
+          return (
+            <p key={index} className="text-gray-700 mb-4">
+              {section.content}
+            </p>
+          );
         }
 
         if (section.type === "image") {
-          return <img key={index} src={section.src} alt={section.alt} className="w-full h-auto mb-8 rounded-lg shadow-md" />;
+          return (
+            <img
+              key={index}
+              src={section.src}
+              alt={section.alt}
+              className="w-full h-auto mb-8 rounded-lg shadow-md"
+            />
+          );
         }
 
         if (section.type === "code") {
           return (
             <div key={index} className="relative mb-8">
-              <CopyToClipboard text={section.content} onCopy={() => setCopied(true)}>
+              <CopyToClipboard
+                text={section.content}
+                onCopy={() => setCopied(true)}
+              >
                 <button className="absolute right-4 top-4 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded px-2 py-1 text-sm text-gray-800 flex items-center">
                   {copied ? "Copied!" : "Copy"}
                   <FiCopy className="ml-2" />
                 </button>
               </CopyToClipboard>
-              <pre className="bg-gray-900 text-white p-4 rounded-lg shadow-md overflow-x-auto text-sm">
-                <code>{section.content}</code>
+              <pre className="bg-gray-900 text-white p-4 rounded-lg shadow-md overflow-x-auto max-w-full text-sm">
+                <code className="language-javascript"> {/* Sesuaikan bahasa kode */}
+                  {section.content}
+                </code>
               </pre>
             </div>
           );
