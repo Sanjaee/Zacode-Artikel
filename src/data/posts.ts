@@ -224,9 +224,12 @@ class GoogleController extends Controller
 
       {
         type: "code",
-        content: `//jangan lupa import GoogleController dari Auth
+        content: `<?php
+
 use App\Http\Controllers\Auth\GoogleController;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+;
         
         Route::get('/', function () {
     return view('welcome');
