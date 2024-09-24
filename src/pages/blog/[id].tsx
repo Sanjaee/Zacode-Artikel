@@ -16,7 +16,7 @@ const PostDetail = ({
     title: string;
     description: string;
     image: string;
-    contentSections: any[];
+    contentSections: any[]; // Menampung berbagai tipe konten (text, image, code, video)
   };
 }) => {
   const [copied, setCopied] = useState(false);
@@ -64,7 +64,7 @@ const PostDetail = ({
       {post.contentSections.map((section, index) => {
         if (section.type === "text") {
           return (
-            <p key={index} className="text-gray-700 mb-4">
+            <p key={index} className="text-gray-700 mb-4 font-semibold">
               {section.content}
             </p>
           );
@@ -98,6 +98,21 @@ const PostDetail = ({
                   {section.content}
                 </code>
               </pre>
+            </div>
+          );
+        }
+
+        // Bagian untuk menampilkan video
+        if (section.type === "video") {
+          return (
+            <div key={index} className="mb-8">
+              <video
+                controls
+                className="w-full h-auto rounded-lg shadow-md"
+              >
+                <source src={section.src} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
           );
         }
