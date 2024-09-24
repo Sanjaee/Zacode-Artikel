@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import { renderCanvas } from "../Theme/renderCanvas";
 import { useEffect } from "react";
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { ScrollContext } from "@/Theme/ScrollProvider";
 import { FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
