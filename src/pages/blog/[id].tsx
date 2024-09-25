@@ -27,9 +27,15 @@ const PostDetail = ({
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsClient(true); // Menandai bahwa kita sudah di client-side
-      Prism.highlightAll();
     }
-  }, [post]);
+  }, []);
+
+  // Menjalankan highlight setiap kali post berubah
+  useEffect(() => {
+    if (isClient) {
+      Prism.highlightAll(); // Highlight kode
+    }
+  }, [isClient, post]); // Memastikan highlight terjadi setiap kali isClient atau post berubah
 
   useEffect(() => {
     if (copied) {
@@ -94,7 +100,7 @@ const PostDetail = ({
                 </button>
               </CopyToClipboard>
               <pre className="bg-gray-900 text-white p-4 rounded-lg shadow-md overflow-x-auto max-w-full text-sm">
-                <code className="language-javascript"> {/* Sesuaikan bahasa kode */}
+                <code className="language-javascript">
                   {section.content}
                 </code>
               </pre>

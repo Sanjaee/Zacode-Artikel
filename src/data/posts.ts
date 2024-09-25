@@ -10,7 +10,17 @@ export const posts = [
     contentSections: [
       {
         type: "text",
-        content: "1. Migrasi dulu database user yang sudah di sediakan laravel",
+        content: "1. Migrasi dulu database user, jangan lupa buat table nya dan masukan nama table nya di .env DB_DATABASE",
+      },
+
+      {
+        type: "code",
+        content:`DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=google
+DB_USERNAME=root
+DB_PASSWORD=`,
       },
 
       {
