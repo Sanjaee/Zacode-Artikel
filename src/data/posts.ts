@@ -56,7 +56,7 @@ DB_PASSWORD=`,
 
       {
         type: "text",
-        content: "5. Tambahkan di config/app.php code di bawah ini",
+        content: "5. Tambahkan di config/services.php code di bawah ini",
       },
 
       {
