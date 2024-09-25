@@ -85,20 +85,19 @@ GOOGLE_REDIRECT_URL=http://localhost:8000/auth/google/callback`,
 
       {
         type: "text",
-        content:
-          "8. tambahkan code ini di Auth/GoogleController.php ",
+        content: "8. tambahkan code ini di Auth/GoogleController.php ",
       },
 
       {
         type: "code",
         content: `<?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\\Http\\Controllers\\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Laravel\Socialite\Facades\Socialite;
+use App\\Http\\Controllers\\Controller;
+use App\\Models\\User;
+use Illuminate\\Support\\Facades\\Auth;
+use Laravel\\Socialite\\Facades\\Socialite; 
 
 class GoogleController extends Controller 
 {
@@ -133,7 +132,7 @@ class GoogleController extends Controller
 
             
             return redirect('/dashboard');
-        } catch (\Exception $e) {
+        } catch (\\Exception $e) {
             return redirect('/login');
         }
     }
@@ -176,7 +175,6 @@ class GoogleController extends Controller
         `,
       },
 
-
       {
         type: "text",
         content:
@@ -215,8 +213,6 @@ class GoogleController extends Controller
         `,
       },
 
-      
-
       {
         type: "text",
         content: "11. terakhir buatkan route nya di routes/web.php",
@@ -226,22 +222,18 @@ class GoogleController extends Controller
         type: "code",
         content: `<?php
 
-use App\Http\Controllers\Auth\GoogleController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+use App\\Http\\Controllers\\Auth\\GoogleController;
+use Illuminate\\Support\\Facades\\Route;
+use Illuminate\\Support\\Facades\\Auth;
 ;
         
         Route::get('/', function () {
     return view('welcome');
 });
-
-
-Route::get('/login', function () {
+        Route::get('/login', function () {
     return view('login');
 })->name('login');
-
-
-Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
+        Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::get('/dashboard', function () {
@@ -253,84 +245,12 @@ Route::get('/logout', function () {
     return redirect('/login');
 })->name('logout');
         `,
-      }, 
-
-      {
-        type: "text",
-        content: "12. masuk ke http://127.0.0.1:8000/login, jangan lupa follow https://www.tiktok.com/@ahmadafriza25",
-      } 
-    ],
-  },
-
-  {
-    id: 2,
-    title: "Cara Membuat Login Dengan OTP Di Express.js",
-    content:
-      "Cara Membuat Auth Login Dengan OTP Dengan Express.js, Menggunakan Email.",
-    description:
-      "Tutorial ini akan membahas langkah-langkah untuk membuat sistem login yang aman menggunakan One-Time Password (OTP) di aplikasi Express.js. Kita akan menggunakan Nodemailer untuk mengirim email, JSON Web Token (JWT) untuk otentikasi, dan mengatur CORS untuk mengizinkan permintaan dari domain lain. Berikut adalah panduan lengkap yang mencakup pengaturan server, pengiriman OTP melalui email, serta proses verifikasi OTP oleh pengguna.",
-    image: "/images/nextjs-intro.png",
-    category: "Express",
-    contentSections: [
-      {
-        type: "text",
-        content: "1. Install Dependencies",
-      },
-
-      {
-        type: "code",
-        content: `npm i @prisma/client express jsonwebtoken nodemailer bcryptjs cors dotenv nodemon`,
       },
 
       {
         type: "text",
-        content: "2. Buat Struktur direktori",
-      },
-
-      {
-        type: "code",
-        content: `your-project/
-│
-├── src/
-│   ├── controllers/
-│   │   └── userController.js
-│   │
-│   ├── models/
-│   │   └── User.js
-│   │
-│   ├── routes/
-│   │   └── userRoutes.js
-│   │
-│   ├── prisma/
-│   │   └── schema.prisma
-│   │
-│   └── index.js
-│
-├── package.json
-└── .env
-
-`,
-      },
-
-      {
-        type: "text",
-        content: "3. Buat Schema Prisma",
-      },
-
-      {
-        type: "code",
-        content: `
-        model User {
-  id          String       @id @default(cuid())
-  username    String    
-  email       String    @unique
-  password    String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  verificationToken String?
-  isVerified  Boolean   @default(false)
-}
-        `,
+        content:
+          "12. masuk ke http://127.0.0.1:8000/login, jangan lupa follow https://www.tiktok.com/@ahmadafriza25",
       },
     ],
   },
