@@ -1,30 +1,28 @@
-import { useEffect, useState } from "react";
-import { GetServerSideProps } from "next";
+import React, { useEffect, useState } from "react";
+import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
+import Image from "next/image";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { FiCopy } from "react-icons/fi";
-import Prism from "prismjs";
-import "prismjs/themes/prism-okaidia.css";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Post, ContentSection } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const PostDetail = ({ post }: any) => {
+interface PostDetailProps {
+  post: Post & { contentSections: ContentSection[] };
+}
+
+const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
   const [copied, setCopied] = useState(false);
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsClient(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isClient) {
+    import('prismjs').then((Prism) => {
+      require('prismjs/components/prism-javascript');
+      require('prismjs/themes/prism-okaidia.css');
       Prism.highlightAll();
-    }
-  }, [isClient, post]);
+    });
+  }, [post]);
 
   useEffect(() => {
     if (copied) {
@@ -33,7 +31,9 @@ const PostDetail = ({ post }: any) => {
     }
   }, [copied]);
 
-  if (!isClient) return null;
+  if (router.isFallback) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -47,91 +47,106 @@ const PostDetail = ({ post }: any) => {
       <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
       <p className="text-lg text-gray-600 mb-6">{post.description}</p>
       {post.image && (
-        <img
+        <Image
           src={post.image}
           alt={post.title}
+          width={800}
+          height={400}
           className="w-full h-auto mb-8 rounded-lg shadow-md"
+          loading="lazy"
         />
       )}
 
-      {post.contentSections.map((section: any, index: number) => {
+      {post.contentSections.map((section, index) => {
         const sectionNumber = index + 1;
         
-        if (section.type === "text") {
-          return (
-            <p key={index} className="text-gray-700 mb-4 font-semibold">
-              <span className="font-bold">{sectionNumber}. </span>{section.content}
-            </p>
-          );
+        switch (section.type) {
+          case "text":
+            return (
+              <p key={index} className="text-gray-700 mb-4 font-semibold">
+                <span className="font-bold">{sectionNumber}. </span>{section.content}
+              </p>
+            );
+          case "image":
+            return (
+              <div key={index} className="mb-8">
+                <p className="font-bold mb-2">{sectionNumber}. </p>
+                <Image
+                  src={section.src || ''}
+                  alt={`Section ${sectionNumber}`}
+                  width={800}
+                  height={400}
+                  className="w-full h-auto rounded-lg shadow-md"
+                  loading="lazy"
+                />
+              </div>
+            );
+          case "code":
+            return (
+              <div key={index} className="relative mb-8">
+                <p className="font-bold mb-2">{sectionNumber}. </p>
+                <CopyToClipboard
+                  text={section.content || ''}
+                  onCopy={() => setCopied(true)}
+                >
+                  <button className="absolute right-4 top-12 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded px-2 py-1 text-sm text-gray-800 flex items-center">
+                    {copied ? "Copied!" : "Copy"}
+                    <FiCopy className="ml-2" />
+                  </button>
+                </CopyToClipboard>
+                <pre className="bg-gray-900 text-white p-4 rounded-lg shadow-md overflow-x-auto max-w-full text-sm">
+                  <code className="language-javascript">
+                    {section.content}
+                  </code>
+                </pre>
+              </div>
+            );
+          case "video":
+            return (
+              <div key={index} className="mb-8">
+                <p className="font-bold mb-2">{sectionNumber}. </p>
+                <video
+                  controls
+                  className="w-full h-auto rounded-lg shadow-md"
+                >
+                  <source src={section.src || ''} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            );
+          default:
+            return null;
         }
-
-        if (section.type === "image") {
-          return (
-            <div key={index} className="mb-8">
-              <p className="font-bold mb-2">{sectionNumber}. </p>
-              <img
-                src={section.src}
-                alt={`Section ${sectionNumber}`}
-                className="w-full h-auto rounded-lg shadow-md"
-              />
-            </div>
-          );
-        }
-
-        if (section.type === "code") {
-          return (
-            <div key={index} className="relative mb-8">
-              <p className="font-bold mb-2">{sectionNumber}. </p>
-              <CopyToClipboard
-                text={section.content}
-                onCopy={() => setCopied(true)}
-              >
-                <button className="absolute right-4 top-12 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded px-2 py-1 text-sm text-gray-800 flex items-center">
-                  {copied ? "Copied!" : "Copy"}
-                  <FiCopy className="ml-2" />
-                </button>
-              </CopyToClipboard>
-              <pre className="bg-gray-900 text-white p-4 rounded-lg shadow-md overflow-x-auto max-w-full text-sm">
-                <code className="language-javascript">
-                  {section.content}
-                </code>
-              </pre>
-            </div>
-          );
-        }
-
-        if (section.type === "video") {
-          return (
-            <div key={index} className="mb-8">
-              <p className="font-bold mb-2">{sectionNumber}. </p>
-              <video
-                controls
-                className="w-full h-auto rounded-lg shadow-md"
-              >
-                <source src={section.src} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          );
-        }
-
-        return null;
       })}
     </div>
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await prisma.post.findMany({ select: { id: true } });
+  const paths = posts.map((post) => ({
+    params: { id: post.id.toString() },
+  }));
+
+  return { paths, fallback: 'blocking' };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
   const id = params?.id;
   const post = await prisma.post.findUnique({
     where: { id: Number(id) },
     include: { contentSections: true },
   });
 
+  if (!post) {
+    return { notFound: true };
+  }
+
   return {
     props: {
       post: JSON.parse(JSON.stringify(post)),
     },
+    revalidate: 60, // Revalidate every 60 seconds
   };
 };
 
