@@ -8,7 +8,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const posts = await prisma.post.findMany({
         include: {
-          contentSections: true,
+          contentSections: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
         },
       });
       res.status(200).json(posts);
@@ -27,15 +34,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           image,
           category,
           contentSections: {
-            create: contentSections,
+            create: contentSections.map((section: any, index: number) => ({
+              type: section.type,
+              content: section.content,
+              src: section.src,
+              order: index,
+            })),
           },
         },
         include: {
-          contentSections: true,
+          contentSections: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
         },
       });
       res.status(201).json(post);
     } catch (error) {
+      console.error('Error creating post:', error);
       res.status(500).json({ error: 'Error creating post' });
     }
   } else {

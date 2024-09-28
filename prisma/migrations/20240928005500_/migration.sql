@@ -6,6 +6,8 @@ CREATE TABLE "Post" (
     "description" TEXT NOT NULL,
     "image" TEXT NOT NULL,
     "category" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
 );
@@ -16,7 +18,10 @@ CREATE TABLE "ContentSection" (
     "type" TEXT NOT NULL,
     "content" TEXT,
     "src" TEXT,
+    "order" INTEGER NOT NULL,
     "postId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ContentSection_pkey" PRIMARY KEY ("id")
 );

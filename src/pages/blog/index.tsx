@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Button } from "@nextui-org/react";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +24,8 @@ const Blog = ({ initialPosts }: any) => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const response = await fetch('/api/posts');
+      const response = await fetch("/api/posts");
+      console.log(response);
       const data = await response.json();
       setPosts(data);
     };
@@ -63,11 +64,14 @@ const Blog = ({ initialPosts }: any) => {
             <Button
               key={category}
               className={`flex-shrink-0 text-lg font-medium px-4 py-2 transition-colors duration-300 ease-in-out ${
-                (selectedCategory === category || (selectedCategory === "" && category === "All"))
+                selectedCategory === category ||
+                (selectedCategory === "" && category === "All")
                   ? "bg-black text-white"
                   : "bg-gray-200 hover:bg-gray-300"
               } rounded-full`}
-              onClick={() => setSelectedCategory(category === "All" ? "" : category)}
+              onClick={() =>
+                setSelectedCategory(category === "All" ? "" : category)
+              }
             >
               {category}
             </Button>
@@ -86,22 +90,23 @@ const Blog = ({ initialPosts }: any) => {
             whileHover="hover"
             className="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-shadow duration-300"
           >
-          {/* Link to post detail page by ID */}
-<Link href={`/blog/${post.id}`} className="block">
-  <div className="max-w-sm rounded overflow-hidden shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl">
-    <img
-      className="w-full h-48 object-cover"
-      src={post.image} // Pastikan ada field 'image' di post
-      alt={post.title}
-    />
-    <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
-      <p className="text-gray-600 mb-2">{post.content.substring(0, 100)}...</p>
-      <span className="text-sm text-blue-500">{post.category}</span>
-    </div>
-  </div>
-</Link>
-
+            {/* Link to post detail page by ID */}
+            <Link href={`/blog/${post.id}`} className="block">
+              <div className="max-w-sm rounded overflow-hidden shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl">
+                <img
+                  className="w-full h-48 object-cover"
+                  src={post.image} // Pastikan ada field 'image' di post
+                  alt={post.title}
+                />
+                <div className="p-4">
+                  <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
+                  <p className="text-gray-600 mb-2">
+                    {post.content.substring(0, 100)}...
+                  </p>
+                  <span className="text-sm text-blue-500">{post.category}</span>
+                </div>
+              </div>
+            </Link>
           </motion.div>
         ))}
       </div>
@@ -111,11 +116,20 @@ const Blog = ({ initialPosts }: any) => {
 
 export async function getServerSideProps() {
   const posts = await prisma.post.findMany();
+  
+  // Convert date fields to ISO strings to avoid serialization issues
+  const serializedPosts = posts.map((post) => ({
+    ...post,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+  }));
+
   return {
     props: {
-      initialPosts: posts,
+      initialPosts: serializedPosts,
     },
   };
 }
+
 
 export default Blog;

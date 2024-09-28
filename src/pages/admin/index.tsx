@@ -25,6 +25,13 @@ const CreatePostForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const confirmation = window.confirm("Apakah Anda yakin ingin membuat postingan ini?");
+    
+    if (!confirmation) {
+      toast.info('Pembuatan postingan dibatalkan');
+      return;
+    }
+
     try {
       const response = await fetch('/api/posts', {
         method: 'POST',
@@ -42,8 +49,9 @@ const CreatePostForm = () => {
       });
 
       if (response.ok) {
-        toast.success('Post created successfully');
         router.push('/blog');
+        toast.success('Post created successfully');
+        
       } else {
         console.error('Failed to create post');
         toast.error('Failed to create post');
