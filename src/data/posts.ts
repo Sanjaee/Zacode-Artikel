@@ -102,12 +102,12 @@ GOOGLE_REDIRECT_URL=http://localhost:8000/auth/google/callback`,
         type: "code",
         content: `<?php
 
-namespace App\\Http\\Controllers\\Auth;
+namespace App\Http\Controllers\Auth;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Models\\User;
-use Illuminate\\Support\\Facades\\Auth;
-use Laravel\\Socialite\\Facades\\Socialite; 
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite; 
 
 class GoogleController extends Controller 
 {
@@ -142,7 +142,7 @@ class GoogleController extends Controller
 
             
             return redirect('/dashboard');
-        } catch (\\Exception $e) {
+        } catch (\Exception $e) {
             return redirect('/login');
         }
     }
@@ -232,9 +232,9 @@ class GoogleController extends Controller
         type: "code",
         content: `<?php
 
-use App\\Http\\Controllers\\Auth\\GoogleController;
-use Illuminate\\Support\\Facades\\Route;
-use Illuminate\\Support\\Facades\\Auth;
+use App\Http\Controllers\Auth\GoogleController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 ;
         
         Route::get('/', function () {

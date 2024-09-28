@@ -1,59 +1,47 @@
 import { useEffect, useState } from "react";
-import { GetStaticPaths, GetStaticProps } from "next";
-import { posts } from "../../data/posts";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { FiCopy } from "react-icons/fi";
 import Prism from "prismjs";
-import "prismjs/themes/prism-okaidia.css"; // Kamu bisa pilih tema lain sesuai keinginan
+import "prismjs/themes/prism-okaidia.css";
+import { PrismaClient } from '@prisma/client';
 
-// Halaman detail post berdasarkan ID
-const PostDetail = ({
-  post,
-}: {
-  post: {
-    id: number;
-    title: string;
-    description: string;
-    image: string;
-    contentSections: any[]; // Menampung berbagai tipe konten (text, image, code, video)
-  };
-}) => {
+const prisma = new PrismaClient();
+
+const PostDetail = ({ post }: any) => {
   const [copied, setCopied] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
-  // Pastikan Prism hanya dijalankan di client-side
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIsClient(true); // Menandai bahwa kita sudah di client-side
+      setIsClient(true);
     }
   }, []);
 
-  // Menjalankan highlight setiap kali post berubah
   useEffect(() => {
     if (isClient) {
-      Prism.highlightAll(); // Highlight kode
+      Prism.highlightAll();
     }
-  }, [isClient, post]); // Memastikan highlight terjadi setiap kali isClient atau post berubah
+  }, [isClient, post]);
 
   useEffect(() => {
     if (copied) {
-      const timer = setTimeout(() => setCopied(false), 2000); // Reset copied setelah 2 detik
+      const timer = setTimeout(() => setCopied(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [copied]);
 
-  if (!isClient) return null; // Menunda rendering sampai berada di client-side
+  if (!isClient) return null;
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      {/* Tombol Kembali */}
       <button
         onClick={() => router.back()}
         className="mb-4 bg-black text-white px-4 py-2 rounded hover:bg-gray-600"
       >
-        Kembali
+        Back
       </button>
 
       <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
@@ -66,35 +54,39 @@ const PostDetail = ({
         />
       )}
 
-      {/* Render setiap section konten secara dinamis */}
-      {post.contentSections.map((section, index) => {
+      {post.contentSections.map((section: any, index: number) => {
+        const sectionNumber = index + 1;
+        
         if (section.type === "text") {
           return (
             <p key={index} className="text-gray-700 mb-4 font-semibold">
-              {section.content}
+              <span className="font-bold">{sectionNumber}. </span>{section.content}
             </p>
           );
         }
 
         if (section.type === "image") {
           return (
-            <img
-              key={index}
-              src={section.src}
-              alt={section.alt}
-              className="w-full h-auto mb-8 rounded-lg shadow-md"
-            />
+            <div key={index} className="mb-8">
+              <p className="font-bold mb-2">{sectionNumber}. </p>
+              <img
+                src={section.src}
+                alt={`Section ${sectionNumber}`}
+                className="w-full h-auto rounded-lg shadow-md"
+              />
+            </div>
           );
         }
 
         if (section.type === "code") {
           return (
             <div key={index} className="relative mb-8">
+              <p className="font-bold mb-2">{sectionNumber}. </p>
               <CopyToClipboard
                 text={section.content}
                 onCopy={() => setCopied(true)}
               >
-                <button className="absolute right-4 top-4 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded px-2 py-1 text-sm text-gray-800 flex items-center">
+                <button className="absolute right-4 top-12 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded px-2 py-1 text-sm text-gray-800 flex items-center">
                   {copied ? "Copied!" : "Copy"}
                   <FiCopy className="ml-2" />
                 </button>
@@ -108,10 +100,10 @@ const PostDetail = ({
           );
         }
 
-        // Bagian untuk menampilkan video
         if (section.type === "video") {
           return (
             <div key={index} className="mb-8">
+              <p className="font-bold mb-2">{sectionNumber}. </p>
               <video
                 controls
                 className="w-full h-auto rounded-lg shadow-md"
@@ -129,26 +121,16 @@ const PostDetail = ({
   );
 };
 
-// Mengambil semua possible `id` untuk halaman statis
-export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = posts.map((post) => ({
-    params: { id: post.id.toString() },
-  }));
-
-  return {
-    paths,
-    fallback: false,
-  };
-};
-
-// Mengambil data berdasarkan `id`
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const id = params?.id;
-  const post = posts.find((post) => post.id === Number(id));
+  const post = await prisma.post.findUnique({
+    where: { id: Number(id) },
+    include: { contentSections: true },
+  });
 
   return {
     props: {
-      post,
+      post: JSON.parse(JSON.stringify(post)),
     },
   };
 };

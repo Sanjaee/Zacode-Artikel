@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
-import { Button } from "@nextui-org/react"; // Import Button dari Next UI
-import { posts } from "../../data/posts";
+import { useState, useEffect } from "react";
+import { Button } from "@nextui-org/react";
+import { PrismaClient } from '@prisma/client';
 
-// Framer Motion Variants untuk animasi
+const prisma = new PrismaClient();
+
+// Framer Motion Variants for animation
 const containerVariants = {
   hidden: { opacity: 0, y: "-10vh" },
   visible: {
@@ -15,16 +17,26 @@ const containerVariants = {
   hover: { scale: 1.05, transition: { yoyo: Infinity } },
 };
 
-const Blog = () => {
-  // State untuk pencarian dan kategori
+const Blog = ({ initialPosts }: any) => {
+  const [posts, setPosts] = useState(initialPosts);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // Filter berdasarkan pencarian dan kategori
-  const filteredPosts = posts.filter((post) => {
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const response = await fetch('/api/posts');
+      const data = await response.json();
+      setPosts(data);
+    };
+
+    fetchPosts();
+  }, []);
+
+  // Filter based on search and category
+  const filteredPosts = posts.filter((post: any) => {
     return (
       (post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        post.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (selectedCategory === "" || post.category === selectedCategory)
     );
   });
@@ -35,7 +47,7 @@ const Blog = () => {
     <div className="p-8">
       <h1 className="text-4xl font-bold mb-8">Source Code</h1>
 
-      {/* Input pencarian */}
+      {/* Search input */}
       <input
         type="text"
         placeholder="Search posts..."
@@ -44,29 +56,28 @@ const Blog = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* Tombol badge kategori */}
+      {/* Category badge buttons */}
       <div className="mb-6 overflow-x-auto">
-  <div className="flex space-x-4">
-    {categories.map((category) => (
-      <Button
-        key={category}
-        className={`flex-shrink-0 text-lg font-medium px-4 py-2 transition-colors duration-300 ease-in-out ${
-          (selectedCategory === category || (selectedCategory === "" && category === "All"))
-            ? "bg-black text-white"
-            : "bg-gray-200 hover:bg-gray-300"
-        } rounded-full`}
-        onClick={() => setSelectedCategory(category === "All" ? "" : category)}
-      >
-        {category}
-      </Button>
-    ))}
-  </div>
-</div>
+        <div className="flex space-x-4">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              className={`flex-shrink-0 text-lg font-medium px-4 py-2 transition-colors duration-300 ease-in-out ${
+                (selectedCategory === category || (selectedCategory === "" && category === "All"))
+                  ? "bg-black text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
+              } rounded-full`}
+              onClick={() => setSelectedCategory(category === "All" ? "" : category)}
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+      </div>
 
-
-      {/* Daftar post dengan animasi */}
+      {/* List of posts with animation */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredPosts.map((post) => (
+        {filteredPosts.map((post: any) => (
           <motion.div
             key={post.id}
             variants={containerVariants}
@@ -75,19 +86,36 @@ const Blog = () => {
             whileHover="hover"
             className="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-shadow duration-300"
           >
-            {/* Link ke halaman detail post sesuai ID */}
-            <Link href={`/blog/${post.id}`}>
-              <div>
-                <h2 className="text-2xl font-semibold mb-4">{post.title}</h2>
-                <p className="text-gray-600 mb-2">{post.content}</p>
-                <span className="text-sm text-blue-500">{post.category}</span>
-              </div>
-            </Link>
+          {/* Link to post detail page by ID */}
+<Link href={`/blog/${post.id}`} className="block">
+  <div className="max-w-sm rounded overflow-hidden shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl">
+    <img
+      className="w-full h-48 object-cover"
+      src={post.image} // Pastikan ada field 'image' di post
+      alt={post.title}
+    />
+    <div className="p-4">
+      <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
+      <p className="text-gray-600 mb-2">{post.content.substring(0, 100)}...</p>
+      <span className="text-sm text-blue-500">{post.category}</span>
+    </div>
+  </div>
+</Link>
+
           </motion.div>
         ))}
       </div>
     </div>
   );
 };
+
+export async function getServerSideProps() {
+  const posts = await prisma.post.findMany();
+  return {
+    props: {
+      initialPosts: posts,
+    },
+  };
+}
 
 export default Blog;
