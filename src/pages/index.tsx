@@ -3,9 +3,10 @@ import { renderCanvas } from "../Theme/renderCanvas";
 import { useEffect } from "react";
 import { useContext, useRef } from "react";
 import { ScrollContext } from "@/Theme/ScrollProvider";
-import { FiArrowRight } from "react-icons/fi";
-import Link from "next/link";
 import Lanyard from "@/components/Lanyard";
+import { FlipWordsDemo } from "@/components/FlipWordsDemo";
+import { HoverBorderGradientDemo } from "@/components/HoverBorderGradientDemo";
+import { LinkPreviewDemo } from "@/components/LinkPreviewDemo";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,14 +40,20 @@ export default function Home() {
         className="bg-skin-base pointer-events-none absolute inset-0"
         id="canvas"
       ></canvas>
-      <div className="w-full h-screen mt-72 flex flex-col items-center justify-center">
-        <Lanyard />
-        <Link href="/blog">
-          <div className="flex items-center justify-center  bg-black text-white py-3 px-6 rounded-lg shadow-lg hover:bg-gray-600 transition-all duration-300 ease-in-out">
-            <span className="mr-2">Go to Blog</span>
-            <FiArrowRight className="text-xl" />
-          </div>
-        </Link>
+      <div className="w-full grid lg:grid-cols-2 grid-cols-1 mt-[400px] lg:mt-52">
+       
+
+        {/* kiri */}
+        <div className="mt-40 flex flex-col">
+          <FlipWordsDemo />
+          <HoverBorderGradientDemo/>
+          <LinkPreviewDemo/>
+        </div>
+
+         {/* kanan */}
+         <div className="h-[450px] hidden lg:block">
+          <Lanyard />
+        </div>
       </div>
     </div>
   );

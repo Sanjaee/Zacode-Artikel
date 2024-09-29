@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     unoptimized: true,
-    domains: ["res.cloudinary.com"],
+    domains: ["res.cloudinary.com",  "api.microlink.io"],
   },
 };
 

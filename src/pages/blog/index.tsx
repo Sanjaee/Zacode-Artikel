@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@nextui-org/react";
 import { PrismaClient, Post as PrismaPost } from "@prisma/client";
+import { motion } from "framer-motion"; // Import motion
 
 const prisma = new PrismaClient();
 
@@ -23,7 +24,7 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const router = useRouter();
 
-  // Filter based on search and category
+  // Filter berdasarkan pencarian dan kategori
   const filteredPosts = useMemo(() => {
     return posts.filter((post) => {
       const contentLower = (post.content || "").toLowerCase();
@@ -44,11 +45,25 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
     }, undefined, { shallow: true });
   };
 
+  // Variants untuk animasi Framer Motion
+  const containerVariants = {
+    hidden: { opacity: 0, y: -50 }, // Muncul dari atas (y negatif)
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3 }, // Transisi lebih cepat
+    },
+    hover: {
+      scale: 1.05,
+      transition: { duration: 0.2 }, // Hover lebih cepat
+    },
+  };
+  
   return (
     <div className="p-8">
       <h1 className="text-4xl font-bold mb-8">Source Code</h1>
 
-      {/* Search input */}
+      {/* Input pencarian */}
       <input
         type="text"
         placeholder="Search posts..."
@@ -57,7 +72,7 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
       />
 
-      {/* Category badge buttons */}
+      {/* Tombol kategori */}
       <div className="mb-6 overflow-x-auto">
         <div className="flex space-x-4">
           {categories.map((category) => (
@@ -77,32 +92,35 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
         </div>
       </div>
 
-      {/* List of posts */}
+      {/* Daftar postingan */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredPosts.map((post) => (
-          <div
+          <motion.div
             key={post.id}
-            className="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-shadow duration-300"
+            variants={containerVariants} // Tambahkan variants
+            initial="hidden" // State awal
+            animate="visible" // State setelah muncul
+            whileHover="hover" // State saat hover
+            className="relative p-1 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            style={{ minHeight: "350px" }} // Set ukuran minimum kartu
           >
-            <Link href={`/blog/${post.id}`} className="block">
-              <div className="max-w-sm rounded overflow-hidden shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl">
+            <Link href={`/blog/${post.id}`} className="block h-full">
+              <div className="relative bg-white p-6 rounded-lg">
                 <Image
                   src={post.image || "/placeholder-image.jpg"}
                   alt={post.title}
                   width={400}
                   height={200}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover rounded-lg mb-4"
                 />
-                <div className="p-4">
-                  <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
-                  <p className="text-gray-600 mb-2">
-                    {(post.content || "").substring(0, 100)}...
-                  </p>
-                  <span className="text-sm text-blue-500">{post.category}</span>
-                </div>
+                <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
+                <p className="text-gray-600 mb-2">
+                  {(post.content || "").substring(0, 100)}...
+                </p>
+                <span className="text-sm text-blue-500">{post.category}</span>
               </div>
             </Link>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -125,7 +143,7 @@ export async function getStaticProps() {
       initialPosts: serializedPosts,
       categories,
     },
-    revalidate: 60, // Revalidate every 60 seconds
+    revalidate: 60, // Revalidate setiap 60 detik
   };
 }
 
