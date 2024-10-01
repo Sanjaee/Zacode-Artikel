@@ -11,7 +11,7 @@ export function HoverBorderGradientDemo() {
     router.push("/blog");
   };
   return (
-    <div className="mt-10 pr-60 flex justify-center items-center ">
+    <div className="mt-10 lg:pr-60 flex justify-center items-center ">
       <button onClick={handleClick} className="group/button relative inline-flex items-center justify-center overflow-hidden rounded-md bg-gray-800 backdrop-blur-lg px-6 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl hover:shadow-gray-600/50 border border-white/20">
         <span className="text-lg">Go To Documentation</span>
         <FiArrowRight className="ml-4 text-lg" />

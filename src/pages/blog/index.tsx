@@ -5,10 +5,11 @@ import Image from "next/image";
 import { Button } from "@nextui-org/react";
 import { PrismaClient, Post as PrismaPost } from "@prisma/client";
 import { motion } from "framer-motion"; // Import motion
+import { BsEye } from "react-icons/bs";
 
 const prisma = new PrismaClient();
 
-type Post = Omit<PrismaPost, 'createdAt' | 'updatedAt'> & {
+type Post = Omit<PrismaPost, "createdAt" | "updatedAt"> & {
   createdAt: string;
   updatedAt: string;
 };
@@ -39,10 +40,17 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category === "All" ? "" : category);
-    router.push({
-      pathname: router.pathname,
-      query: { ...router.query, category: category === "All" ? "" : category },
-    }, undefined, { shallow: true });
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          category: category === "All" ? "" : category,
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   // Variants untuk animasi Framer Motion
@@ -58,7 +66,7 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
       transition: { duration: 0.2 }, // Hover lebih cepat
     },
   };
-  
+
   return (
     <div className="p-8">
       <h1 className="text-4xl font-bold mb-8">Source Code</h1>
@@ -69,7 +77,9 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
         placeholder="Search posts..."
         className="p-3 mb-6 border-2 border-gray-300 rounded w-full focus:outline-none focus:border-black transition-all duration-500 ease-in-out"
         value={searchTerm}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setSearchTerm(e.target.value)
+        }
       />
 
       {/* Tombol kategori */}
@@ -105,19 +115,39 @@ const Blog: React.FC<BlogProps> = ({ initialPosts, categories }) => {
             style={{ minHeight: "350px" }} // Set ukuran minimum kartu
           >
             <Link href={`/blog/${post.id}`} className="block h-full">
-              <div className="relative bg-white p-6 rounded-lg">
-                <Image
-                  src={post.image || "/placeholder-image.jpg"}
-                  alt={post.title}
-                  width={400}
-                  height={200}
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
-                <p className="text-gray-600 mb-2">
-                  {(post.content || "").substring(0, 100)}...
-                </p>
-                <span className="text-sm text-blue-500">{post.category}</span>
+              <div className="relative bg-white p-6 rounded-lg flex flex-col justify-between h-full">
+                <div className="flex flex-col">
+                  <Image
+                    src={post.image || "/placeholder-image.jpg"}
+                    alt={post.title}
+                    width={400}
+                    height={200}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                  <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
+                  <p className="text-gray-600 mb-2">
+                    {(post.content || "").substring(0, 100)}...
+                  </p>
+                </div>
+
+                {/* category dan views di bawah */}
+                <div className="flex items-center justify-between mt-auto">
+                  <div className="flex items-center">
+                    <BsEye size={16} className="mr-1" />
+                    <span className="text-sm">{post.views}</span>
+
+                    <span className="text-sm text-blue-500 ml-1">Views</span>
+                  </div>
+                  <div className="flex items-center text-gray-500">
+                    <span className="text-sm ml-1">
+                      {new Date(post.createdAt).toLocaleDateString("id-ID", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
               </div>
             </Link>
           </motion.div>
@@ -131,7 +161,7 @@ export async function getStaticProps() {
   const posts = await prisma.post.findMany();
   const categorySet = new Set(posts.map((post) => post.category));
   const categories = ["All", ...Array.from(categorySet)];
-  
+
   const serializedPosts = posts.map((post) => ({
     ...post,
     createdAt: post.createdAt.toISOString(),
